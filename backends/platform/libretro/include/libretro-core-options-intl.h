@@ -71,6 +71,11 @@ extern "C" {
 
 struct retro_core_option_v2_category option_cats_it[] = {
 	{
+		"video",
+		NULL,
+		"Configura le impostazioni video"
+	},
+	{
 		"cursor",
 		"Cursore",
 		"Impostazioni relative al movimento del cursore"
@@ -548,6 +553,18 @@ struct retro_core_option_v2_definition option_defs_it[] = {
 		"scummvm_mapper_rr",
 		"RetroPad > Leva Analogica Destra > Leva Analogica Destra",
 		"Leva Analogica Destra > Destra",
+		NULL,
+		NULL,
+		NULL,
+		{
+			{ NULL, NULL }
+		},
+		NULL,
+	},
+	{
+		"scummvm_video_hw_acceleration",
+		"Video > Accelerazione hardware",
+		"Accelerazione hardware",
 		NULL,
 		NULL,
 		NULL,
