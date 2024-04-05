@@ -214,8 +214,8 @@ void OSystem_libretro::processInputs(void) {
 	int p_x = retro_input_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
 	int p_y = retro_input_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
 	int p_press = retro_input_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_PRESSED);
-	int px = (int)((p_x + 0x7fff) * _screen.w / 0xffff);
-	int py = (int)((p_y + 0x7fff) * _screen.h / 0xffff);
+	int px = (int)((p_x + 0x7fff) * LIBRETRO_GRAPHICS_MANAGER->getScreen().w / 0xffff);
+	int py = (int)((p_y + 0x7fff) * LIBRETRO_GRAPHICS_MANAGER->getScreen().h / 0xffff);
 	// printf("(%d,%d) p:%d\n",px,py,pp);
 
 	static int ptrhold = 0;
