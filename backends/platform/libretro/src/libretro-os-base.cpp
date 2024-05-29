@@ -39,7 +39,7 @@
 #include "backends/platform/libretro/include/libretro-fs.h"
 #include "backends/platform/libretro/include/libretro-graphics.h"
 
-OSystem_libretro::OSystem_libretro() : _mouseX(0), _mouseY(0), _mouseXAcc(0.0), _mouseYAcc(0.0), _dpadXAcc(0.0), _dpadYAcc(0.0), _dpadXVel(0.0f), _dpadYVel(0.0f), _mixer(0), _startTime(0), _cursorStatus(0) {
+OSystem_libretro::OSystem_libretro() : _mouseX(0), _mouseY(0), _mouseXAcc(0.0), _mouseYAcc(0.0), _dpadXAcc(0.0), _dpadYAcc(0.0), _dpadXVel(0.0f), _dpadYVel(0.0f), _mixer(nullptr), _startTime(0), _cursorStatus(0) {
 	_fsFactory = new FS_SYSTEM_FACTORY();
 
 	setLibretroDir(retro_get_system_dir(), s_systemDir);
@@ -52,7 +52,8 @@ OSystem_libretro::OSystem_libretro() : _mouseX(0), _mouseY(0), _mouseXAcc(0.0), 
 }
 
 OSystem_libretro::~OSystem_libretro() {
-	delete _mixer;
+	if (_mixer)
+		delete _mixer;
 	_mixer = nullptr;
 }
 
