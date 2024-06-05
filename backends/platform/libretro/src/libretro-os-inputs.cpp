@@ -22,10 +22,14 @@
 #include "backends/platform/libretro/include/libretro-os.h"
 #include "backends/platform/libretro/include/libretro-mapper.h"
 #include "backends/platform/libretro/include/libretro-core.h"
-#include "backends/platform/libretro/include/libretro-graphics.h"
+#include "backends/platform/libretro/include/libretro-graphics-surface.h"
+#ifdef USE_OPENGL
+#include "backends/platform/libretro/include/libretro-graphics-opengl.h"
+#endif
 
 void OSystem_libretro::updateMouseXY(float deltaAcc, float *cumulativeXYAcc, int doing_x) {
-	int *mouseXY;
+	Common::Point currentXY(dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMousePosition());
+	int16 *mouseXY;
 	int16 screen_wh;
 	int *relMouseXY;
 	int cumulativeXYAcc_int;
@@ -38,13 +42,13 @@ void OSystem_libretro::updateMouseXY(float deltaAcc, float *cumulativeXYAcc, int
 
 	if (doing_x) {
 		_cursorStatus |= CURSOR_STATUS_DOING_X;
-		mouseXY = &_mouseX;
-		screen_wh = getScreenWidth();
+		mouseXY = &(currentXY.x);
+		screen_wh = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getWindowWidth();
 		relMouseXY = &_relMouseX;
 	} else {
 		_cursorStatus |= CURSOR_STATUS_DOING_Y;
-		mouseXY = &_mouseY;
-		screen_wh = getScreenHeight();
+		mouseXY = &(currentXY.y);
+		screen_wh = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getWindowHeight();
 		relMouseXY = &_relMouseY;
 	}
 	*cumulativeXYAcc += deltaAcc;
@@ -58,6 +62,7 @@ void OSystem_libretro::updateMouseXY(float deltaAcc, float *cumulativeXYAcc, int
 		*cumulativeXYAcc -= (float)cumulativeXYAcc_int;
 	}
 	*relMouseXY = (int)deltaAcc;
+	setMousePosition(currentXY.x,currentXY.y);
 }
 
 void OSystem_libretro::getMouseXYFromAnalog(bool is_x, int16 coor) {
@@ -149,15 +154,12 @@ void OSystem_libretro::processInputs(void) {
 		getMouseXYFromButton(false, y_coor_cursor);
 
 	if (_cursorStatus & CURSOR_STATUS_DOING_JOYSTICK) {
-		Common::Point mouse = convertWindowToVirtual(_mouseX,_mouseY);
 		Common::Event ev;
 		ev.type = Common::EVENT_MOUSEMOVE;
-		ev.mouse.x = mouse.x;
-		ev.mouse.y = mouse.y;
+		ev.mouse = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMouseVPosition();
 		ev.relMouse.x = _cursorStatus & CURSOR_STATUS_DOING_X ? _relMouseX : 0;
 		ev.relMouse.y = _cursorStatus & CURSOR_STATUS_DOING_Y ? _relMouseY : 0;
 		_events.push_back(ev);
-		setMousePosition(_mouseX,_mouseY);
 	}
 
 	// Handle special functions
@@ -177,21 +179,17 @@ void OSystem_libretro::processInputs(void) {
 	// Handle mouse buttons
 	retropad_value = mapper_get_mapper_key_status(RETROKE_LEFT_BUTTON);
 	if (retropad_value & (1 << RETRO_DEVICE_KEY_CHANGED)) {
-		Common::Point mouse = convertWindowToVirtual(_mouseX,_mouseY);
 		Common::Event ev;
-		ev.type = eventID[0][(retropad_value & (1 << RETRO_DEVICE_KEY_STATUS)) ? 0 : 1];
-		ev.mouse.x = mouse.x;
-		ev.mouse.y = mouse.y;
+		ev.type = eventID[0][(retropad_value & (1 << RETRO_DEVICE_KEY_STATUS)) ? 0 : 1];		
+		ev.mouse = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMouseVPosition();
 		_events.push_back(ev);
 	}
 
 	retropad_value = mapper_get_mapper_key_status(RETROKE_RIGHT_BUTTON);
 	if (retropad_value & (1 << RETRO_DEVICE_KEY_CHANGED)) {
-		Common::Point mouse = convertWindowToVirtual(_mouseX,_mouseY);
 		Common::Event ev;
-		ev.type = eventID[1][(retropad_value & (1 << RETRO_DEVICE_KEY_STATUS)) ? 0 : 1];
-		ev.mouse.x = mouse.x;
-		ev.mouse.y = mouse.y;
+		ev.type = eventID[1][(retropad_value & (1 << RETRO_DEVICE_KEY_STATUS)) ? 0 : 1];		
+		ev.mouse = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMouseVPosition();
 		_events.push_back(ev);
 	}
 
@@ -230,32 +228,25 @@ void OSystem_libretro::processInputs(void) {
 		ptrhold = 0;
 
 	if (ptrhold > 0) {
-		_mouseX = px;
-		_mouseY = py;
-
+		setMousePosition(px, py);
 		Common::Event ev;
 		ev.type = Common::EVENT_MOUSEMOVE;
-		ev.mouse.x = _mouseX;
-		ev.mouse.y = _mouseY;
+		ev.mouse = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMouseVPosition();
 		_events.push_back(ev);
 		setMousePosition(_mouseX,_mouseY);
 	}
 
 	if (ptrhold > 10 && _ptrmouseButton == 0) {
-		Common::Point mouse = convertWindowToVirtual(_mouseX,_mouseY);
 		_ptrmouseButton = 1;
 		Common::Event ev;
 		ev.type = eventID[0][_ptrmouseButton ? 0 : 1];
-		ev.mouse.x = mouse.x;
-		ev.mouse.y = mouse.y;
+		ev.mouse = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMouseVPosition();
 		_events.push_back(ev);
 	} else if (ptrhold == 0 && _ptrmouseButton == 1) {
-		Common::Point mouse = convertWindowToVirtual(_mouseX,_mouseY);
 		_ptrmouseButton = 0;
 		Common::Event ev;
 		ev.type = eventID[0][_ptrmouseButton ? 0 : 1];
-		ev.mouse.x = mouse.x;
-		ev.mouse.y = mouse.y;
+		ev.mouse = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMouseVPosition();
 		_events.push_back(ev);
 	}
 
@@ -295,26 +286,21 @@ void OSystem_libretro::processInputs(void) {
 	}
 
 	if (_cursorStatus & CURSOR_STATUS_DOING_MOUSE) {
-		Common::Point mouse = convertWindowToVirtual(_mouseX,_mouseY);
 		Common::Event ev;
 		ev.type = Common::EVENT_MOUSEMOVE;
-		ev.mouse.x = mouse.x;
-		ev.mouse.y = mouse.y;
+		ev.mouse = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMouseVPosition();
 		ev.relMouse.x = _cursorStatus & CURSOR_STATUS_DOING_X ? _relMouseX : 0;
 		ev.relMouse.y = _cursorStatus & CURSOR_STATUS_DOING_Y ? _relMouseY : 0;
 		_events.push_back(ev);
-		setMousePosition(_mouseX,_mouseY);
 	}
 
 	for (int i = 0; i < 2; i++) {
-		Common::Point mouse = convertWindowToVirtual(_mouseX,_mouseY);
 		Common::Event ev;
 		bool down = retro_input_cb(0, RETRO_DEVICE_MOUSE, 0, retroButtons[i]);
 		if (down != _mouseButtons[i]) {
 			_mouseButtons[i] = down;
 			ev.type = eventID[i][down ? 0 : 1];
-			ev.mouse.x = mouse.x;
-			ev.mouse.y = mouse.y;
+			ev.mouse = dynamic_cast<LibretroGraphics *>(_graphicsManager)->getMouseVPosition();
 			_events.push_back(ev);
 		}
 	}

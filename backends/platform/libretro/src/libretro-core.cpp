@@ -45,6 +45,8 @@
 #define INCLUDED_FROM_BASE_VERSION_CPP
 #include "base/internal_version.h"
 
+#include "graphics/managed_surface.h"
+
 #include "backends/platform/libretro/include/libretro-defs.h"
 #include "backends/platform/libretro/include/libretro-core.h"
 #include "backends/platform/libretro/include/libretro-threads.h"
@@ -641,7 +643,7 @@ uint16 retro_setting_get_sample_rate(void) {
 }
 
 uint16 retro_setting_get_audio_samples_buffer_size(void) {
-	/* ScummVM audio buffer size is normally between 512 and 8192, but the value
+	/* ScummVM a.udio buffer size is normally between 512 and 8192, but the value
 	must be one of: 256, 512, 1024, 2048, 4096, 8192, 16384, or 32768. */
 	uint16 v = audio_samples_per_frame--;
 	v |= v >> 1;
@@ -1108,14 +1110,13 @@ void retro_run(void) {
 		/* Retrieve video */
 		if (!skip_frame && (audio_video_enable & 1)) {
 			if (video_hw_mode & VIDEO_GRAPHIC_MODE_REQUEST_SW) {
-				const Graphics::Surface *screen;
+				const Graphics::ManagedSurface *screen;
 				LIBRETRO_G_SYSTEM->getScreen(screen);
 				video_cb(screen->getPixels(), screen->w, screen->h, screen->pitch);
 			} else
 				video_cb(RETRO_HW_FRAME_BUFFER_VALID, LIBRETRO_G_SYSTEM->getScreenWidth(),  LIBRETRO_G_SYSTEM->getScreenHeight(), 0);
 
 		}
-
 		current_frame++;
 
 		poll_cb();

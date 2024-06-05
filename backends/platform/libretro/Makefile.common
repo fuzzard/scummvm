@@ -7,6 +7,7 @@ INCLUDES    :=
 OBJS_DEPS   :=
 OBJS        :=
 DETECT_OBJS :=
+LIBRETRO_OBJS :=
 $(foreach MODULE,$(MODULES),$(MODULE_OBJS-$(MODULE)) :=)
 MODULES     :=
 
@@ -113,10 +114,11 @@ else
 endif
 
 ifeq ($(or $(HAVE_OPENGL), $(HAVE_OPENGLES2)), 1)
-	USE_OPENGL := 1
-	USE_OPENGL_GAME := 1
-	USE_OPENGL_SHADERS := 1
-	DEFINES += -DUSE_OPENGL -DUSE_GLAD -DUSE_OPENGL_GAME -DUSE_OPENGL_SHADERS
+   USE_OPENGL := 1
+   USE_OPENGL_GAME := 1
+   USE_OPENGL_SHADERS := 1
+   DEFINES += -DUSE_OPENGL -DUSE_GLAD -DUSE_OPENGL_GAME -DUSE_OPENGL_SHADERS
+   LIBRETRO_OBJS += $(CORE_PATH)/libretro-graphics-opengl.o
 ifeq ($(HAVE_OPENGL), 1)
 	DEFINES += -DHAVE_OPENGL
         $(info Support for OpenGL requested)
@@ -136,7 +138,7 @@ endif
 INCLUDES     += -I$(ROOT_PATH)/include
 MODULE_PATHS += $(CORE_PATH)
 
-LIBRETRO_OBJS := $(CORE_PATH)/libretro-core.o \
+LIBRETRO_OBJS += $(CORE_PATH)/libretro-core.o \
 	$(CORE_PATH)/libretro-fs.o \
 	$(CORE_PATH)/libretro-fs-factory.o \
 	$(CORE_PATH)/libretro-os-base.o \
@@ -147,7 +149,8 @@ LIBRETRO_OBJS := $(CORE_PATH)/libretro-core.o \
 	$(CORE_PATH)/libretro-timer.o \
 	$(CORE_PATH)/libretro-mapper.o \
 	$(CORE_PATH)/libretro-options-widget.o \
-	$(CORE_PATH)/libretro-graphics.o
+	$(CORE_PATH)/libretro-graphics.o \
+	$(CORE_PATH)/libretro-graphics-surface.o
 
 OBJS += $(LIBRETRO_OBJS)
 

@@ -15,16 +15,24 @@
  *
  */
 
+#ifndef BACKENDS_LIBRETRO_GRAPHICS_OPENGL_H
+#define BACKENDS_LIBRETRO_GRAPHICS_OPENGL_H
+
+#include "backends/graphics/opengl/opengl-graphics.h"
 #include "backends/platform/libretro/include/libretro-graphics.h"
 
-void LibretroGraphics::setMousePosition(int x, int y){	
-	WindowedGraphicsManager::setMousePosition(x, y);
-}
+class LibretroOpenGLGraphics : public OpenGL::OpenGLGraphicsManager, public LibretroGraphics {
+public:
+	LibretroOpenGLGraphics(OpenGL::ContextType contextType);
+	~LibretroOpenGLGraphics();
+	bool loadVideoMode(uint requestedWidth, uint requestedHeight, const Graphics::PixelFormat &format) override { return true; };
+	void refreshScreen() override;
+};
 
-Common::Point LibretroGraphics::getMousePosition(void) const{	
-	return Common::Point(_cursorX, _cursorY);
-}
+class LibretroHWFramebuffer : public OpenGL::Backbuffer {
 
-Common::Point LibretroGraphics::getMouseVPosition(void) const {
-		return WindowedGraphicsManager::convertWindowToVirtual(_cursorX, _cursorY);
-}
+protected:
+	void activateInternal() override;
+};
+
+#endif //BACKENDS_LIBRETRO_GRAPHICS_OPENGL_H
