@@ -709,11 +709,15 @@ static void exit_to_frontend(void) {
 }
 
 static void close_emu_thread(void) {
+	retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
+	retro_log_cb(RETRO_LOG_DEBUG, "retro_emu_thread_initialized():%d, retro_emu_thread_exited():%d, %d [ok]\n", retro_emu_thread_initialized(), retro_emu_thread_exited());
 	while (retro_emu_thread_initialized() && !retro_emu_thread_exited()) {
 		LIBRETRO_G_SYSTEM->requestQuit();
 		retro_switch_to_emu_thread();
 	}
+	retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
 	retro_deinit_emu_thread();
+	retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
 }
 
 #if defined(WIIU) || defined(__SWITCH__) || defined(_MSC_VER) || defined(_3DS)
@@ -893,15 +897,18 @@ void retro_init(void) {
 }
 
 void retro_deinit(void) {
+	retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
 	LIBRETRO_G_SYSTEM->destroy();
+	retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
 
 	if (audio_sample_buffer)
 		free(audio_sample_buffer);
-
+retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
 	audio_sample_buffer       = NULL;
 	audio_samples_per_frame   = 0.0f;
 	audio_samples_accumulator = 0.0f;
 	log_scummvm_exit_code();
+retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
 }
 
 void retro_set_controller_port_device(unsigned port, unsigned device) {
@@ -1125,7 +1132,9 @@ void retro_run(void) {
 }
 
 void retro_unload_game(void) {
+	retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
 	close_emu_thread();
+	retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
 }
 
 void retro_reset(void) {
