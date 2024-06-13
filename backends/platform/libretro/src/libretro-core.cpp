@@ -710,8 +710,8 @@ static void exit_to_frontend(void) {
 
 static void close_emu_thread(void) {
 	retro_log_cb(RETRO_LOG_DEBUG, "%s, %s, %d [ok]\n", __FILE__, __func__, __LINE__);
-	retro_log_cb(RETRO_LOG_DEBUG, "retro_emu_thread_initialized():%d, retro_emu_thread_exited():%d, %d [ok]\n", retro_emu_thread_initialized(), retro_emu_thread_exited());
-	while (retro_emu_thread_initialized() && !retro_emu_thread_exited()) {
+	retro_log_cb(RETRO_LOG_DEBUG, "retro_emu_thread_initialized():%d, retro_emu_thread_started():%d, %d [ok]\n", retro_emu_thread_initialized(), retro_emu_thread_started());
+	while (retro_emu_thread_started() && !retro_emu_thread_exited()) {
 		LIBRETRO_G_SYSTEM->requestQuit();
 		retro_switch_to_emu_thread();
 	}
@@ -893,6 +893,7 @@ void retro_init(void) {
 	if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL))
 		input_bitmask_supported = true;
 
+	retro_log_cb(RETRO_LOG_DEBUG, "retro_emu_thread_initialized():%d, retro_emu_thread_started():%d, %d [ok]\n", retro_emu_thread_initialized(), retro_emu_thread_started());
 	g_system = new OSystem_libretro();
 }
 
@@ -1028,12 +1029,13 @@ bool retro_load_game(const struct retro_game_info *game) {
 	} else {
 		game_buf_ptr = NULL;
 	}
-
+retro_log_cb(RETRO_LOG_DEBUG, "retro_emu_thread_initialized():%d, retro_emu_thread_started():%d, %d [ok]\n", retro_emu_thread_initialized(), retro_emu_thread_started());
 	if (!retro_init_emu_thread()) {
 		if (retro_log_cb)
 			retro_log_cb(RETRO_LOG_ERROR, "[scummvm] Failed to initialize emulation thread!\n");
 		return false;
 	}
+retro_log_cb(RETRO_LOG_DEBUG, "retro_emu_thread_initialized():%d, retro_emu_thread_started():%d, %d [ok]\n", retro_emu_thread_initialized(), retro_emu_thread_started());
 	return true;
 }
 
